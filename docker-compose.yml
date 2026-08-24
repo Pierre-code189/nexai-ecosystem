@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  nexai-web-builder:
+    build:
+      context: ./nexai-web-builder
+      dockerfile: Dockerfile
+    container_name: nexai-web-builder
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_CRM_API_URL=http://nexai-crm-core:3001/api/leads
+      - NEXT_PUBLIC_CRM_DASHBOARD_URL=http://localhost:3001/dashboard
+      - OLLAMA_API_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL_NAME=qwen2.5:1.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 600M
+
+  nexai-crm-core:
+    build:
+      context: ./nexai-crm-core
+      dockerfile: Dockerfile
+    container_name: nexai-crm-core
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - NEXT_PUBLIC_APP_URL=http://localhost:3001
+      - NEXT_PUBLIC_ENABLE_MOCK_STORAGE=false
+      - NEXT_PUBLIC_WEB_BUILDER_URL=http://localhost:3000
+      - NEXT_PUBLIC_WHATSAPP_BOT_URL=http://nexai-whatsapp-bot:3002
+      - OLLAMA_API_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL_NAME=qwen2.5:1.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 600M
+
+  nexai-whatsapp-bot:
+    build:
+      context: ./nexai-whatsapp-bot-service
+      dockerfile: Dockerfile
+    container_name: nexai-whatsapp-bot
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./nexai-whatsapp-bot-service/baileys_auth_local:/app/baileys_auth_local
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - CRM_SERVICE_URL=http://nexai-crm-core:3001/api/leads
+      - OLLAMA_API_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL_NAME=qwen2.5:1.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 450M
+
+networks:
+  default:
+    name: nexai-network

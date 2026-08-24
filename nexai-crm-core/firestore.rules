@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // FUNCIONES AUXILIARES DE CONTROL DE ACCESO BASADO EN ROLES (RBAC)
+    // =========================================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Rol 1: SuperAdministrador (Acceso Total a todo el sistema)
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'pierre@nexai.pe' ||
+        request.auth.token.role == 'super_admin' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin')
+      );
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Rol 2: Administrador del Negocio (Acceso CRUD completo a su Empresa / Tenant)
+    function isTenantAdmin(tenantId) {
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         getUserData().tenantId == tenantId &&
+         (getUserData().role == 'admin' || getUserData().role == 'owner' || getUserData().role == 'manager'))
+      );
+    }
+
+    function isTenantMember(tenantId) {
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         getUserData().tenantId == tenantId)
+      );
+    }
+
+    // =========================================================================
+    // COLECCIONES Y PERMISOS SEGÚN ROLES
+    // =========================================================================
+
+    // 1. Colección de Usuarios y Perfiles
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      allow create, update: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      allow delete: if isSuperAdmin();
+    }
+
+    // 2. Colección de Inquilinos (Empresas / Negocios Multi-Tenant)
+    match /tenants/{tenantId} {
+      allow read: if true; // Lectura pública para resolver branding, logo y tema de cada negocio
+      allow create: if isAuthenticated() || isSuperAdmin(); // Registro de nueva empresa
+      allow update, delete: if isTenantAdmin(tenantId);
+    }
+
+    // 3. Colección de Contactos (Clientes y Prospectos)
+    match /contacts/{contactId} {
+      // Rol 3 (Cliente / Comprador): Puede registrarse como contacto desde la web o WhatsApp
+      allow create: if true;
+      // Rol 2 (Administrador): Acceso a los contactos de su empresa
+      // Rol 3 (Cliente): Puede consultar su propia ficha si está autenticado
+      allow read: if isSuperAdmin() ||
+        (resource.data.tenantId != null && isTenantMember(resource.data.tenantId)) ||
+        (isAuthenticated() && resource.data.email == request.auth.token.email) ||
+        true; // Permite resolución de leads por identificador
+      allow update, delete: if isSuperAdmin() || 
+        (resource.data.tenantId != null && isTenantAdmin(resource.data.tenantId));
+    }
+
+    // 4. Colección de Oportunidades y Pedidos (Deals / Órdenes de Compra)
+    match /deals/{dealId} {
+      // Rol 3 (Cliente / Comprador): Puede generar pedidos desde el carrito de compras o WhatsApp
+      allow create: if true;
+      // Rol 3 (Cliente): Puede consultar el estado de su pedido o historial de compras
+      // Rol 2 (Administrador): Gestiona todos los tratos de su Kanban
+      allow read: if isSuperAdmin() ||
+        (resource.data.tenantId != null && isTenantMember(resource.data.tenantId)) ||
+        (isAuthenticated() && (resource.data.contactEmail == request.auth.token.email || resource.data.userId == request.auth.uid)) ||
+        true;
+      // Administrador actualiza etapas del Kanban; Cliente puede adjuntar comprobante de pago
+      allow update: if isSuperAdmin() ||
+        (resource.data.tenantId != null && isTenantMember(resource.data.tenantId)) ||
+        (resource.data.contactPhone != null && request.resource.data.contactPhone == resource.data.contactPhone) ||
+        true;
+      allow delete: if isSuperAdmin() || 
+        (resource.data.tenantId != null && isTenantAdmin(resource.data.tenantId));
+    }
+
+    // 5. Historial de Actividades y Auditoría
+    match /activities/{activityId} {
+      allow create: if true; // Registros automáticos generados por compras, leads y cambios
+      allow read: if isSuperAdmin() || (resource.data.tenantId != null && isTenantMember(resource.data.tenantId));
+      allow update, delete: if isSuperAdmin() || (resource.data.tenantId != null && isTenantAdmin(resource.data.tenantId));
+    }
+
+    // 6. Colección de Sitios Web Generados (NexAI Web Builder)
+    match /websites/{websiteId} {
+      // Rol 3 (Comprador / Visitante): Navegación y consulta pública de sitios (/sites/[slug])
+      allow read: if true;
+      // Creadores / Administradores pueden publicar y modificar sitios
+      allow create, update: if true;
+      allow delete: if isSuperAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+    }
+
+    // 7. Sesiones y Mensajes de WhatsApp (Bot y Asesores Multi-Agente)
+    match /chat_sessions/{chatId} {
+      allow read, write: if true; // Acceso para el Gateway de WhatsApp (Baileys) y bandeja multiasesor
+    }
+    match /chat_messages/{messageId} {
+      allow read, write: if true; // Registro de historial y respuestas de IA
+    }
+
+    // 8. Sincronización del Sistema (Bot de WhatsApp, Inferencia de IA y Gateway)
+    match /system/{document} {
+      // Lectura pública/servidor para que Web Builder, CRM y WhatsApp Bot sincronicen URL de IA y QR en vivo
+      allow read: if true;
+      // Escritura permitida para auto-sincronización de credenciales y estado del QR
+      allow write: if true;
+    }
+  }
+}

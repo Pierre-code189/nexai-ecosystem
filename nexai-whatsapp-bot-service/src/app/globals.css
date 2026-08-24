@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { --color-primary: #10b981; --color-secondary: #059669; }
+body { background: #090d16; color: #f8fafc; font-family: system-ui, sans-serif; min-height: 100vh; }
