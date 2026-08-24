@@ -45,8 +45,8 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
   const [isDarkMode, setIsDarkMode] = useState(true);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const primaryColor = website.theme.primaryColor || '#ea580c';
-  const secondaryColor = website.theme.secondaryColor || '#9a3412';
+  const primaryColor = website.theme?.primaryColor || '#ea580c';
+  const secondaryColor = website.theme?.secondaryColor || '#9a3412';
 
   // Carrito de compras reactivo
   const addToCart = (item: { id: string; title: string; price?: string }) => {
@@ -230,7 +230,7 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
             }
             className="focus:outline-none"
           >
-            {website.hero.badge || '✨ Calidad Garantizada'}
+            {website.hero?.badge || '✨ Calidad Garantizada'}
           </span>
         </div>
 
@@ -240,11 +240,11 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
           onBlur={(e) =>
             !isReadOnly &&
             onUpdateWebsite &&
-            onUpdateWebsite({ ...website, hero: { ...website.hero, title: e.currentTarget.textContent || website.hero.title } })
+            onUpdateWebsite({ ...website, hero: { ...website.hero, title: e.currentTarget.textContent || website.hero?.title } })
           }
           className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.15] focus:outline-none"
         >
-          {website.hero.title}
+          {website.hero?.title}
         </h1>
 
         <p
@@ -253,11 +253,11 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
           onBlur={(e) =>
             !isReadOnly &&
             onUpdateWebsite &&
-            onUpdateWebsite({ ...website, hero: { ...website.hero, subtitle: e.currentTarget.textContent || website.hero.subtitle } })
+            onUpdateWebsite({ ...website, hero: { ...website.hero, subtitle: e.currentTarget.textContent || website.hero?.subtitle } })
           }
           className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed focus:outline-none"
         >
-          {website.hero.subtitle}
+          {website.hero?.subtitle}
         </p>
 
         <div className="flex flex-wrap justify-center gap-3.5 pt-2">
@@ -266,7 +266,7 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
             className="px-6 py-3 rounded-xl font-bold text-xs sm:text-sm text-white shadow-xl hover:opacity-90 transition-all flex items-center gap-2"
             style={{ backgroundColor: primaryColor }}
           >
-            <span>{website.hero.ctaText || 'Hacer Pedido'}</span>
+            <span>{website.hero?.ctaText || 'Hacer Pedido'}</span>
             <ArrowRight className="w-4 h-4" />
           </a>
           <a
@@ -281,7 +281,7 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
         <div className="pt-6 max-w-3xl mx-auto relative group">
           <img
             src={
-              website.hero.bannerImageUrl ||
+              website.hero?.bannerImageUrl ||
               'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80'
             }
             alt="Banner Principal"
@@ -388,7 +388,7 @@ export const WebsiteLivePreview: React.FC<WebsiteLivePreviewProps> = ({
         <section className="px-4 sm:px-8 py-12 max-w-4xl mx-auto text-center space-y-4">
           <div className="flex items-center justify-center gap-2 text-sm font-bold text-blue-400">
             <MapPin className="w-4 h-4" />
-            <span>Nuestra Ubicación: {website.map.address || 'Av. Ramón Mujica 108'}, {website.map.city || 'Piura, Perú'}</span>
+            <span>Nuestra Ubicación: {website.map?.address || 'Av. Ramón Mujica 108'}, {website.map?.city || 'Piura, Perú'}</span>
           </div>
           <div className="w-full h-64 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900">
             <iframe

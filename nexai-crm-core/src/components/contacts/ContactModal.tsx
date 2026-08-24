@@ -15,6 +15,7 @@ export interface ContactModalProps {
   onClose: () => void;
   contact?: Contact | null;
   onSave?: (contact: Partial<Contact>) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const ContactModal: React.FC<ContactModalProps> = ({
@@ -22,8 +23,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({
   onClose,
   contact,
   onSave,
+  onDelete,
 }) => {
-  const { addContact, updateContact } = useCRMData();
+  const { addContact, updateContact, deleteContact } = useCRMData();
   const { currentTenant } = useTenant();
 
   const [formData, setFormData] = useState<Partial<Contact>>({
@@ -37,26 +39,13 @@ export const ContactModal: React.FC<ContactModalProps> = ({
     notes: '',
   });
 
-  const [tagInput, setTagInput] = useState('');
   const isEditing = Boolean(contact && contact.id);
 
   useEffect(() => {
     if (contact) {
-      setFormData({
-        ...contact,
-        customData: contact.customData || {},
-      });
+      setFormData({ ...contact, customData: contact.customData || {} });
     } else {
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        company: '',
-        status: 'lead',
-        tags: [],
-        customData: {},
-        notes: '',
-      });
+      setFormData({ name: '', email: '', phone: '', company: '', status: 'lead', tags: [], customData: {}, notes: '' });
     }
   }, [contact, isOpen]);
 
@@ -82,8 +71,8 @@ export const ContactModal: React.FC<ContactModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Editar Contacto / Cliente' : 'Nuevo Contacto Comercial'}
-      description={isEditing ? 'Modifica los datos del contacto.' : 'Registra un nuevo prospecto o cliente en tu base de datos.'}
+      title={isEditing ? 'Editar Contacto' : 'Nuevo Contacto'}
+      description={isEditing ? 'Modifica los datos del contacto.' : 'Registra un nuevo prospecto o cliente.'}
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -126,7 +115,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({
 
         {contactFields.length > 0 && (
           <div className="pt-3 border-t border-slate-800 space-y-3">
-            <span className="font-bold text-slate-300 block">Campos Específicos del Rubro:</span>
+            <span className="font-bold text-slate-300 block">Campos del Rubro:</span>
             {contactFields.map((field) => (
               <DynamicFieldRenderer
                 key={field.id}
@@ -143,13 +132,28 @@ export const ContactModal: React.FC<ContactModalProps> = ({
           </div>
         )}
 
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit">
-            {isEditing ? 'Guardar Cambios' : 'Crear Contacto'}
-          </Button>
+        <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+          {isEditing && contact?.id ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (onDelete && contact?.id) onDelete(contact.id);
+                else if (contact?.id) deleteContact(contact.id);
+                onClose();
+              }}
+              className="px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+            >
+              Eliminar Contacto
+            </button>
+          ) : <div />}
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit">
+              {isEditing ? 'Guardar Cambios' : 'Crear Contacto'}
+            </Button>
+          </div>
         </div>
       </form>
     </Modal>

@@ -93,19 +93,19 @@ export const WebsiteVisualEditor: React.FC<WebsiteVisualEditorProps> = ({
             />
             <Input
               label="Insignia Destacada (Badge)"
-              value={website.hero.badge || ''}
+              value={website.hero?.badge || ''}
               onChange={(e) => onUpdateWebsite({ ...website, hero: { ...website.hero, badge: e.target.value } })}
             />
             <Input
               label="Título Principal del Hero"
-              value={website.hero.title}
+              value={website.hero?.title}
               onChange={(e) => onUpdateWebsite({ ...website, hero: { ...website.hero, title: e.target.value } })}
             />
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-slate-300">Subtítulo Descriptivo</label>
               <textarea
                 rows={3}
-                value={website.hero.subtitle}
+                value={website.hero?.subtitle}
                 onChange={(e) => onUpdateWebsite({ ...website, hero: { ...website.hero, subtitle: e.target.value } })}
                 className="w-full p-2.5 text-xs bg-slate-950 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
               />
@@ -124,7 +124,7 @@ export const WebsiteVisualEditor: React.FC<WebsiteVisualEditorProps> = ({
             </div>
             <Input
               label="Texto del Botón (CTA)"
-              value={website.hero.ctaText || 'Hacer Pedido'}
+              value={website.hero?.ctaText || 'Hacer Pedido'}
               onChange={(e) => onUpdateWebsite({ ...website, hero: { ...website.hero, ctaText: e.target.value } })}
             />
           </div>
@@ -146,7 +146,7 @@ export const WebsiteVisualEditor: React.FC<WebsiteVisualEditorProps> = ({
                       })
                     }
                     className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
-                      website.theme.primaryColor === preset.primary
+                      website.theme?.primaryColor === preset.primary
                         ? 'bg-slate-800 border-blue-500 shadow-md'
                         : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                     }`}
@@ -166,7 +166,7 @@ export const WebsiteVisualEditor: React.FC<WebsiteVisualEditorProps> = ({
               <div className="flex items-center gap-3">
                 <input
                   type="color"
-                  value={website.theme.primaryColor || '#ea580c'}
+                  value={website.theme?.primaryColor || '#ea580c'}
                   onChange={(e) =>
                     onUpdateWebsite({
                       ...website,
@@ -177,7 +177,7 @@ export const WebsiteVisualEditor: React.FC<WebsiteVisualEditorProps> = ({
                 />
                 <input
                   type="text"
-                  value={website.theme.primaryColor || '#ea580c'}
+                  value={website.theme?.primaryColor || '#ea580c'}
                   onChange={(e) =>
                     onUpdateWebsite({
                       ...website,
@@ -194,7 +194,7 @@ export const WebsiteVisualEditor: React.FC<WebsiteVisualEditorProps> = ({
         {activeTab === 'services' && (
           <div className="space-y-3.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200">{website.services.length} Ítems en el Catálogo</span>
+              <span className="text-xs font-bold text-slate-200">{(website.services?.length || 0)} Ítems en el Catálogo</span>
               <Button size="sm" onClick={handleAddService} leftIcon={<Plus className="w-3.5 h-3.5" />}>
                 Agregar Ítem
               </Button>

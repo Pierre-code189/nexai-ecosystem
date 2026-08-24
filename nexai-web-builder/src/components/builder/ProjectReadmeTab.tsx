@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { GeneratedWebsite } from '@/types/builder';
-import { FileText, Save, Check, Copy, Sparkles } from 'lucide-react';
+import { FileText, Save, Check, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface ProjectReadmeTabProps {
@@ -11,24 +11,7 @@ interface ProjectReadmeTabProps {
 }
 
 export const ProjectReadmeTab: React.FC<ProjectReadmeTabProps> = ({ website, onUpdateWebsite }) => {
-  const defaultReadme = `# 🚀 ${website.businessName} — Especificación del Proyecto
-
-## 🎯 1. Visión y Objetivo
-Sitio web y plataforma comercial para ${website.businessName}.
-
-## 📐 2. Componentes & Funcionalidades Activas
-- [x] **Hero Persuasivo** con botón a WhatsApp
-- [x] **Catálogo Dinámico** con precios en Soles (S/)
-- [x] **Carrito de Compras** y checkout interactivo
-- [x] **Formulario de Contacto** conectado al CRM
-
-## 🎨 3. Reglas de Diseño
-- **Color Primario:** ${website.theme.primaryColor || '#3b82f6'}
-- **Color Secundario:** ${website.theme.secondaryColor || '#1d4ed8'}
-- **Modo:** Oscuro / Claro interactivo
-
-## 📝 4. Changelog de la IA
-- **v1.0.0:** Creación inicial del proyecto a partir del prompt.`;
+  const defaultReadme = `# 🚀 ${website.businessName || 'Mi Proyecto'} — Especificación del Proyecto\n\n## 🎯 1. Visión y Objetivo\nSitio web y plataforma comercial para ${website.businessName || 'la empresa'}.\n\n## 📐 2. Componentes & Funcionalidades Activas\n- [x] **Hero Persuasivo** con botón a WhatsApp\n- [x] **Catálogo Dinámico** con precios en Soles (S/)\n- [x] **Carrito de Compras** y checkout interactivo\n- [x] **Formulario de Contacto** conectado al CRM\n\n## 🎨 3. Reglas de Diseño\n- **Color Primario:** ${website.theme?.primaryColor || '#3b82f6'}\n- **Color Secundario:** ${website.theme?.secondaryColor || '#1d4ed8'}\n- **Modo:** Oscuro / Claro interactivo\n\n## 📝 4. Changelog de la IA\n- **v1.0.0:** Creación inicial del proyecto.`;
 
   const [content, setContent] = useState<string>(
     website.readmeMarkdown || website.readmeContent || defaultReadme

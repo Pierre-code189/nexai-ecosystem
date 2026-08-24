@@ -21,13 +21,13 @@ export const ProjectSpecTab: React.FC<ProjectSpecTabProps> = ({ website, onUpdat
 
 ## 📐 2. Módulos & Funcionalidades
 - [x] Hero Comercial con CTA a WhatsApp
-- [x] Catálogo con ${website.services.length} productos y precios en Soles
+- [x] Catálogo con ${(website.services?.length || 0)} productos y precios en Soles
 - [x] Carrito de Compras interactivo
 - [x] Formulario de Pedidos conectado al CRM
 
 ## 🎨 3. Reglas de Diseño
-- **Color Primario:** ${website.theme.primaryColor || '#ea580c'}
-- **Color Secundario:** ${website.theme.secondaryColor || '#9a3412'}
+- **Color Primario:** ${website.theme?.primaryColor || '#ea580c'}
+- **Color Secundario:** ${website.theme?.secondaryColor || '#9a3412'}
 
 ## 📝 4. Registro de Cambios (Changelog de la IA)
 - **v1.0.0:** Generación inicial del sitio web a partir del prompt.`;
